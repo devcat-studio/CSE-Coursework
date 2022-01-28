@@ -10,22 +10,6 @@
 
     -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <meta property="og:title" content="TWGL.js - twgl-cube" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="http://twgljs.org/examples/screenshots/twgl-cube.png" />
-    <meta property="og:description" content="TWGL.js - twgl-cube" />
-    <meta property="og:url" content="http://twgljs.org" />
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@greggman">
-    <meta name="twitter:creator" content="@greggman">
-    <meta name="twitter:domain" content="twgljs.org">
-    <meta name="twitter:title" content="TWGL.js - twgl-cube">
-    <meta name="twitter:url" content="http://twgljs.org/examples/twgl-cube.html">
-    <meta name="twitter:description" content="TWGL.js - twgl-cube">
-    <meta name="twitter:image:src" content="http://twgljs.org/examples/screenshots/twgl-cube.png">
-
-    <link href="/resources/images/twgljs-icon.png" rel="shortcut icon" type="image/png">
 
     <title>twgl.js - twgl cube</title>
     <style>
@@ -51,6 +35,8 @@
     <canvas id="c"></canvas>
     <div id="b"><a href="http://twgljs.org">twgl.js</a> - twgl-cube</div>
   </body>
+
+  <!------------------- 버텍스 셰이더 ------------------->
   <script id="vs" type="notjs">
 uniform mat4 u_worldViewProjection;
 uniform vec3 u_lightWorldPos;
@@ -77,6 +63,8 @@ void main() {
   gl_Position = v_position;
 }
   </script>
+
+  <!------------------- 프래그먼트(픽셀) 셰이더 ------------------->
   <script id="fs" type="notjs">
 precision mediump float;
 
@@ -115,6 +103,8 @@ void main() {
   gl_FragColor = outColor;
 }
   </script>
+
+  <!------------------- 소스 코드 ------------------->
   <script type="module">
     import * as twgl from './twgl-full.module.js';
     const m4 = twgl.m4;
@@ -142,7 +132,7 @@ void main() {
 
     const uniforms = {
       u_lightWorldPos: [1, 8, -10],
-      u_lightColor: [1, 0.8, 0.8, 1],
+      u_lightColor: [1, 1, 1, 1],
       u_ambient: [0, 0, 0, 1],
       u_specular: [1, 1, 1, 1],
       u_shininess: 50,
@@ -159,7 +149,7 @@ void main() {
       gl.enable(gl.CULL_FACE);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      const fov = 30 * Math.PI / 180;
+      const fov = 45 * Math.PI / 180;
       const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
       const zNear = 0.5;
       const zFar = 10;
