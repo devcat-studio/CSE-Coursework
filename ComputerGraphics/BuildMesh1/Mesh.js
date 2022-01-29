@@ -3,16 +3,21 @@ import * as twgl from '../twgl-full.module.js';
 const v3 = twgl.v3; // https://twgljs.org/docs/module-twgl_v3.html
 
 // 버텍스당 position과 color를 갖고,
-// gl.TRIANGLES 모드로 삼각형들을 추가하는 메시 빌더
-export class MeshBuilder {
+// gl.TRIANGLES 모드로 삼각형들을 관리하는 메시
+export class Mesh {
     constructor() {
         this.position = [];
         this.color = [];
         this.indices = []; // indices는 index의 복수형이다;;
+        this.arrays = {
+            position: this.position,
+            color: this.color,
+            indices: this.indices
+        };
+        this.vertexCount = 0;
     }
 
     addVertex(position, color) {
-        let index = Math.abs(this.position.length / 3);
         this.position.push(position[0]);
         this.position.push(position[1]);
         this.position.push(position[2]);
@@ -20,7 +25,7 @@ export class MeshBuilder {
         this.color.push(color[1]);
         this.color.push(color[2]);
         this.color.push(color[3]);
-        return index;
+        return this.vertexCount++;
     }
 
     addTriangle(i1, i2, i3) {
@@ -29,11 +34,11 @@ export class MeshBuilder {
         this.indices.push(i3);
     }
 
-    getArrays() {
-        return {
-            position: this.position,
-            color: this.color,
-            indices: this.indices
-        }        
+    getPosition(i) {
+        return v3.create(
+            this.position[i * 3],
+            this.position[i * 3 + 1],
+            this.position[i * 3 + 2]
+        );
     }
-}
+};
