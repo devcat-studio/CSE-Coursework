@@ -73,7 +73,8 @@
 
     let homework = new Homework();
     const mesh = homework.buildMesh();
-    const bufferInfo = twgl.createBufferInfoFromArrays(gl, mesh.arrays);
+    const bufferInfo = //twgl.createBufferInfoFromArrays(gl, mesh.arrays);
+        twgl.primitives.createSphereBufferInfo(gl, 2.0, 20, 20);
 
     const screenMousePos = v3.create(1000, 0, -1);
     gl.canvas.addEventListener('mousemove', (e) => {
@@ -117,6 +118,7 @@
         uniforms.u_world = world;
         uniforms.u_worldInverseTranspose = m4.transpose(invWorld);
         uniforms.u_worldViewProjection = worldViewProjection;
+        uniforms.u_lightDirection = v3.normalize(v3.create(1, 0, 0));
 
         // 메시를 그린다
         gl.useProgram(programInfo.program);
