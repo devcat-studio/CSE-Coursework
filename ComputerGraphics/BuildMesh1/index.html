@@ -76,7 +76,6 @@
     }
 </script>
 
-<!------------------- 버텍스 셰이더 ------------------->
 <script id="vsDebugDisplay" type="notjs">
     uniform mat4 u_worldViewProjection;
     attribute vec4 position;
@@ -88,8 +87,6 @@
         gl_Position = u_worldViewProjection * position;
     }
 </script>
-
-<!------------------- 프래그먼트(픽셀) 셰이더 ------------------->
 <script id="fsDebugDisplay" type="notjs">
     precision mediump float;
     varying vec4 v_color;
@@ -101,10 +98,9 @@
 <!------------------- 소스 코드 ------------------->
 <script type="module">
     import * as twgl from '../twgl-full.module.js';
-    import * as M from './MathHelper.mjs';
-    import { Mesh } from './Mesh.mjs';
-    import { Lines } from './Lines.mjs';
-
+    import { Mesh, Lines, lineToPointDistance, rgba } from './Helper.mjs';
+    import { Homework } from './Homework.mjs';
+    
     const m4 = twgl.m4; // https://twgljs.org/docs/module-twgl_m4.html
     const v3 = twgl.v3; // https://twgljs.org/docs/module-twgl_v3.html
     const gl = document.querySelector("#canvas").getContext("webgl");
@@ -112,20 +108,8 @@
     const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
     const debugDisplayProgramInfo = twgl.createProgramInfo(gl, ["vsDebugDisplay", "fsDebugDisplay"]);
 
-    function rgb(r, g, b) { return [r, g, b, 1.0] }
-
-    function buildMesh() {
-        const mesh = new Mesh();
-
-        let vertex1 = mesh.addVertex(v3.create(0, 0, 1), rgb(1, 0, 0));
-        let vertex2 = mesh.addVertex(v3.create(1, 0, -1), rgb(0, 1, 0));
-        let vertex3 = mesh.addVertex(v3.create(-1, 0, -1), rgb(0, 0, 1));
-        mesh.addTriangle(vertex1, vertex2, vertex3);
-
-        return mesh;
-    }
-
-    const mesh = buildMesh();
+    let homework = new Homework();
+    const mesh = homework.buildMesh();
     const bufferInfo = twgl.createBufferInfoFromArrays(gl, mesh.arrays);
 
     const screenMousePos = v3.create(1000, 0, -1);
@@ -158,7 +142,7 @@
         const target = [0, 0, 0];
         const up = [0, 1, 0];
 
-        const world = m4.rotationY(time * 1);
+        const world = m4.rotationY(time * homework.getRotateSpeed());
         const camera = m4.lookAt(eye, target, up);
         const view = m4.inverse(camera);
         const viewProjection = m4.multiply(projection, view);
@@ -188,7 +172,7 @@
         let minDist = 1.0;
         let minIndex = undefined;
         for (let i = 0; i < mesh.vertexCount; ++i) {
-            let dist = M.lineToPointDistance(worldMousePos1, worldMousePos2, mesh.getPosition(i));
+            let dist = lineToPointDistance(worldMousePos1, worldMousePos2, mesh.getPosition(i));
             if (dist < minDist) {
                 minDist = dist;
                 minIndex = i;
@@ -199,14 +183,16 @@
             text.innerHTML = `[#${minIndex}] (${pos[0]}, ${pos[1]}, ${pos[2]})`;
 
             let lines = new Lines();
-            let i1 = lines.addVertex(pos, rgb(0, 0, 0));
-            let i2 = lines.addVertex(v3.mulScalar(pos, 100), rgb(0, 0, 0));
+            let i1 = lines.addVertex(pos, rgba(0, 0, 0, 0.3));
+            let i2 = lines.addVertex(v3.mulScalar(pos, 100), rgba(0, 0, 0, 0.3));
             lines.addLine(i1, i2);
-            const bufferInfo2 = twgl.createBufferInfoFromArrays(gl, lines.arrays);
+
+            const linesBufferInfo = twgl.createBufferInfoFromArrays(gl, lines.arrays);
+            gl.disable(gl.DEPTH_TEST);
             gl.useProgram(debugDisplayProgramInfo.program);
-            twgl.setBuffersAndAttributes(gl, debugDisplayProgramInfo, bufferInfo2);
+            twgl.setBuffersAndAttributes(gl, debugDisplayProgramInfo, linesBufferInfo);
             twgl.setUniforms(debugDisplayProgramInfo, uniforms);
-            twgl.drawBufferInfo(gl, bufferInfo2, gl.LINES);
+            twgl.drawBufferInfo(gl, linesBufferInfo, gl.LINES);
             gl.enable(gl.DEPTH_TEST);
         }
         else {
