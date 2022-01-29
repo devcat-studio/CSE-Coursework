@@ -7,14 +7,17 @@ const vertexShader = `
     // attribute: 각 버텍스마다 다른 입력
     attribute vec4 position;
     attribute vec3 color;
+    attribute vec3 normal;
 
     // varying: 프래그먼트 셰이더로 전달할 출력
     varying vec4 v_color;
+    varying vec3 v_normal;
 
     void main() {
-        v_color = vec4(color.rgb, 1.0);
+        v_color = vec4(color, 1.0);
+        v_normal = normal;
 
-        // 3D API에 전달하는 출력
+        // 3D API에 전달하는 버텍스별 위치 출력
         gl_Position = u_worldViewProjection * position;
     }
 `;
@@ -27,9 +30,10 @@ const pixelShader = `
 
     // varying: 프래그먼트 셰이더로부터 받은 입력
     varying vec4 v_color;
+    varying vec3 v_normal;
 
     void main() {
-        // 3D API에 전달하는 출력. 이 프래그먼트(픽셀)의 최종 컬러를 지정한다.
+        // 3D API에 전달하는 프래그먼트(픽셀)별 컬러 출력.
         gl_FragColor = v_color;
     }
 `;

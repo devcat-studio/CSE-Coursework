@@ -25,6 +25,7 @@ export class Mesh {
     constructor() {
         this.position = [];
         this.color = [];
+        this.normal = [];
         this.indices = []; // indices는 index의 복수형이다;;
         this.arrays = {
             position: this.position,
@@ -34,7 +35,7 @@ export class Mesh {
         this.vertexCount = 0;
     }
 
-    addVertex(position, color) {
+    addVertex(position, color, normal) {
         this.position.push(position[0]);
         this.position.push(position[1]);
         this.position.push(position[2]);
@@ -42,6 +43,16 @@ export class Mesh {
         this.color.push(color[1]);
         this.color.push(color[2]);
         this.color.push(color[3]);
+        if (normal === undefined) {
+            this.normal.push(0);
+            this.normal.push(1);
+            this.normal.push(0);
+        }
+        else {
+            this.normal.push(normal[0]);
+            this.normal.push(normal[1]);
+            this.normal.push(normal[2]);
+        }
         return this.vertexCount++;
     }
 
@@ -103,14 +114,12 @@ export class Lines {
 
 //-----------------------------------------------------------------------------------
 // red, green, blue는 각각 0.0에서 1.0 사이.
-export function rgb(red, green, blue)
-{
+export function rgb(red, green, blue) {
     return [red, green, blue, 1.0]
 }
 
 //-----------------------------------------------------------------------------------
 // red, green, blue, alpha는 각각 0.0에서 1.0 사이.
-export function rgba(red, green, blue, alpha)
-{
+export function rgba(red, green, blue, alpha) {
     return [red, green, blue, alpha]
 }
