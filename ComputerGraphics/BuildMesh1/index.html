@@ -63,7 +63,7 @@
     import { Mesh, Lines, lineToPointDistance, rgba } from './Helper.mjs';
     import { Homework } from './Homework.mjs';
     import * as shader from './Shader.mjs';
-    
+
     const m4 = twgl.m4; // https://twgljs.org/docs/module-twgl_m4.html
     const v3 = twgl.v3; // https://twgljs.org/docs/module-twgl_v3.html
     const gl = document.querySelector("#canvas").getContext("webgl");
@@ -77,13 +77,27 @@
         twgl.primitives.createSphereBufferInfo(gl, 2.0, 10, 10);
 
     const screenMousePos = v3.create(1000, 0, -1);
+    let mouseLeftButtonDown = false;
+    let cameraYaw = 0;
+    let cameraPitch = 0;
     gl.canvas.addEventListener('mousemove', (e) => {
+        // 현재 좌표 얻기
         const rect = gl.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         screenMousePos[0] = x / rect.width * 2 - 1;
         screenMousePos[1] = y / rect.height * -2 + 1;
+
+        // 드래그
+        if (mouseLeftButtonDown) {
+            cameraYaw += e.movementX * 0.01;
+            cameraPitch += e.movementY * 0.01;
+            cameraPitch = Math.min(cameraPitch, Math.PI * 0.49);
+            cameraPitch = Math.max(cameraPitch, -Math.PI * 0.49);
+        }
     });
+    gl.canvas.addEventListener('mousedown', (e) => { mouseLeftButtonDown = true; });
+    gl.canvas.addEventListener('mouseup', (e) => { mouseLeftButtonDown = false; });
 
     const uniforms = {
     };
@@ -102,7 +116,8 @@
         const zNear = 0.1;
         const zFar = 100;
         const projection = m4.perspective(fov, aspect, zNear, zFar);
-        const eye = [2, 8, -12];
+        const camerDistance = 10.0;
+        const eye = v3.mulScalar([Math.cos(cameraYaw)*Math.cos(cameraPitch), Math.sin(cameraPitch), Math.sin(cameraYaw)*Math.cos(cameraPitch)], 10);
         const target = [0, 0, 0];
         const up = [0, 1, 0];
 
