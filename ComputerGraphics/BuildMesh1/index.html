@@ -19,6 +19,7 @@
 
         canvas {
             display: block;
+            background-color: gray;
             width: 100vw;
             height: 100vh;
         }
@@ -41,11 +42,11 @@
 <script id="vsDebugDisplay" type="notjs">
     uniform mat4 u_worldViewProjection;
     attribute vec4 position;
-    attribute vec3 color;
+    attribute vec4 color;
     varying vec4 v_color;
 
     void main() {
-        v_color = vec4(color.rgb, 1.0);
+        v_color = color;
         gl_Position = u_worldViewProjection * position;
     }
 </script>
@@ -78,8 +79,8 @@
 
     const screenMousePos = v3.create(1000, 0, -1);
     let mouseLeftButtonDown = false;
-    let cameraYaw = 0;
-    let cameraPitch = 0;
+    let cameraYaw = 0.1;
+    let cameraPitch = 0.1;
     gl.canvas.addEventListener('mousemove', (e) => {
         // 현재 좌표 얻기
         const rect = gl.canvas.getBoundingClientRect();
@@ -109,6 +110,8 @@
 
         gl.enable(gl.DEPTH_TEST);
         gl.disable(gl.CULL_FACE);
+        gl.disable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         const fov = 45 * Math.PI / 180;
@@ -117,11 +120,11 @@
         const zFar = 100;
         const projection = m4.perspective(fov, aspect, zNear, zFar);
         const camerDistance = 10.0;
-        const eye = v3.mulScalar([Math.cos(cameraYaw)*Math.cos(cameraPitch), Math.sin(cameraPitch), Math.sin(cameraYaw)*Math.cos(cameraPitch)], 10);
+        const eye = v3.mulScalar([Math.cos(cameraYaw) * Math.cos(cameraPitch), Math.sin(cameraPitch), Math.sin(cameraYaw) * Math.cos(cameraPitch)], 10);
         const target = [0, 0, 0];
         const up = [0, 1, 0];
 
-        const world = m4.rotationY(time * homework.getRotateSpeed());
+        const world = m4.rotationY(0);
         const camera = m4.lookAt(eye, target, up);
         const view = m4.inverse(camera);
         const viewProjection = m4.multiply(projection, view);
@@ -141,42 +144,70 @@
         twgl.setUniforms(programInfo, uniforms);
         gl.drawElements(gl.TRIANGLES, bufferInfo.numElements, gl.UNSIGNED_SHORT, 0);
 
-        // 마우스 커서는 2차원 화면에서의 점 하나를 나타내는데
-        // 이것을 3차원 공간으로 옮기면 선이 된다.
-        // 선에서 가장 가까운 버텍스를 찾자.
-        screenMousePos[2] = -1;
-        const worldMousePos1 = m4.transformPoint(invWorldViewProjection, screenMousePos);
-        screenMousePos[2] = 1;
-        const worldMousePos2 = m4.transformPoint(invWorldViewProjection, screenMousePos);
 
-        let minDist = 1.0;
-        let minIndex = undefined;
-        for (let i = 0; i < mesh.vertexCount; ++i) {
-            let dist = lineToPointDistance(worldMousePos1, worldMousePos2, mesh.getPosition(i));
-            if (dist < minDist) {
-                minDist = dist;
-                minIndex = i;
-            }
-        }
-        if (minIndex !== undefined) {
-            let pos = mesh.getPosition(minIndex);
-            text.innerHTML = `[#${minIndex}] (${pos[0]}, ${pos[1]}, ${pos[2]})`;
-
+        // 디버그렌더링
+        {
             let lines = new Lines();
-            let i1 = lines.addVertex(pos, rgba(0, 0, 0, 0.3));
-            let i2 = lines.addVertex(v3.mulScalar(pos, 100), rgba(0, 0, 0, 0.3));
-            lines.addLine(i1, i2);
+            let lineAlpha = 0.6;
+            lines.addLine(
+                lines.addVertex([0, 0, 0], rgba(1, 0, 0, lineAlpha)),
+                lines.addVertex([10, 0, 0], rgba(1, 0, 0, lineAlpha))); // X+
+            lines.addLine(
+                lines.addVertex([0, 0, 0], rgba(0.2, 0, 0, lineAlpha)),
+                lines.addVertex([-10, 0, 0], rgba(0.2, 0, 0, lineAlpha))); // X-
+            lines.addLine(
+                lines.addVertex([0, 0, 0], rgba(0, 1, 0, lineAlpha)),
+                lines.addVertex([0, 10, 0], rgba(0, 1, 0, lineAlpha))); // Y+
+            lines.addLine(
+                lines.addVertex([0, 0, 0], rgba(0, 0.2, 0, lineAlpha)),
+                lines.addVertex([0, -10, 0], rgba(0, 0.2, 0, lineAlpha))); // Y-
+            lines.addLine(
+                lines.addVertex([0, 0, 0], rgba(0, 0, 1, lineAlpha)),
+                lines.addVertex([0, 0, 10], rgba(0, 0, 1, lineAlpha))); // Z+
+            lines.addLine(
+                lines.addVertex([0, 0, 0], rgba(0, 0, 0.2, lineAlpha)),
+                lines.addVertex([0, 0, -10], rgba(0, 0, 0.2, lineAlpha))); // Z-
 
-            const linesBufferInfo = twgl.createBufferInfoFromArrays(gl, lines.arrays);
-            gl.disable(gl.DEPTH_TEST);
-            gl.useProgram(debugDisplayProgramInfo.program);
-            twgl.setBuffersAndAttributes(gl, debugDisplayProgramInfo, linesBufferInfo);
-            twgl.setUniforms(debugDisplayProgramInfo, uniforms);
-            twgl.drawBufferInfo(gl, linesBufferInfo, gl.LINES);
-            gl.enable(gl.DEPTH_TEST);
-        }
-        else {
-            text.innerHTML = '';
+            // 마우스 커서는 2차원 화면에서의 점 하나를 나타내는데
+            // 이것을 3차원 공간으로 옮기면 선이 된다.
+            // 선에서 가장 가까운 버텍스를 찾자.
+            screenMousePos[2] = -1;
+            const worldMousePos1 = m4.transformPoint(invWorldViewProjection, screenMousePos);
+            screenMousePos[2] = 1;
+            const worldMousePos2 = m4.transformPoint(invWorldViewProjection, screenMousePos);
+
+            let minDist = 1.0;
+            let minIndex = undefined;
+            for (let i = 0; i < mesh.vertexCount; ++i) {
+                let dist = lineToPointDistance(worldMousePos1, worldMousePos2, mesh.getPosition(i));
+                if (dist < minDist) {
+                    minDist = dist;
+                    minIndex = i;
+                }
+            }
+            if (minIndex !== undefined) {
+                let pos = mesh.getPosition(minIndex);
+                text.innerHTML = `[#${minIndex}] (${pos[0]}, ${pos[1]}, ${pos[2]})`;
+
+                let i1 = lines.addVertex(pos, rgba(0, 0, 0, 0.3));
+                let i2 = lines.addVertex(v3.mulScalar(pos, 100), rgba(0, 0, 0, 1));
+                lines.addLine(i1, i2);
+            }
+            else {
+                text.innerHTML = '';
+            }
+
+            if (homework.enableDebugRender()) {
+                const linesBufferInfo = twgl.createBufferInfoFromArrays(gl, lines.arrays);
+                gl.disable(gl.DEPTH_TEST);
+                gl.enable(gl.BLEND);
+                gl.useProgram(debugDisplayProgramInfo.program);
+                twgl.setBuffersAndAttributes(gl, debugDisplayProgramInfo, linesBufferInfo);
+                twgl.setUniforms(debugDisplayProgramInfo, uniforms);
+                twgl.drawBufferInfo(gl, linesBufferInfo, gl.LINES);
+                gl.enable(gl.DEPTH_TEST);
+                gl.disable(gl.BLEND);
+            }
         }
 
         requestAnimationFrame(render);

@@ -42,7 +42,7 @@ export class Homework {
         return mesh;
     }
 
-    getRotateSpeed() {
-        return 0.0; // 0을 리턴하면 회전하지 않습니다.
+    enableDebugRender() {
+        return true;
     }
 }
