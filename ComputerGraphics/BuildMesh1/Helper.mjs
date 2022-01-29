@@ -102,12 +102,15 @@ export class Lines {
 };
 
 //-----------------------------------------------------------------------------------
-export function rgb(r, g, b)
+// red, green, blue는 각각 0.0에서 1.0 사이.
+export function rgb(red, green, blue)
 {
-    return [r, g, b, 1.0]
+    return [red, green, blue, 1.0]
 }
 
-export function rgba(r, g, b, a)
+//-----------------------------------------------------------------------------------
+// red, green, blue, alpha는 각각 0.0에서 1.0 사이.
+export function rgba(red, green, blue, alpha)
 {
-    return [r, g, b, a]
+    return [red, green, blue, alpha]
 }
