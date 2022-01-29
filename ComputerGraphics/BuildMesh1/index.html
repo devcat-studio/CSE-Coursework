@@ -74,13 +74,12 @@
 
     let homework = new Homework();
     const mesh = homework.buildMesh();
-    const bufferInfo = //twgl.createBufferInfoFromArrays(gl, mesh.arrays);
-        twgl.primitives.createSphereBufferInfo(gl, 2.0, 10, 10);
+    const bufferInfo = twgl.createBufferInfoFromArrays(gl, mesh.arrays);
 
     const screenMousePos = v3.create(1000, 0, -1);
     let mouseLeftButtonDown = false;
-    let cameraYaw = 0.1;
-    let cameraPitch = 0.1;
+    let cameraYaw = 0.6;
+    let cameraPitch = 0.5;
     gl.canvas.addEventListener('mousemove', (e) => {
         // 현재 좌표 얻기
         const rect = gl.canvas.getBoundingClientRect();
