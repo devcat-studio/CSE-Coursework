@@ -15,8 +15,10 @@ const vertexShader = `
     varying vec3 v_normal;
 
     void main() {
-        v_color = vec4(color, 1.0);
-        v_normal = normal;
+        float intensity = dot(normalize(normal), -u_lightDirection) * 0.5 + 0.5;
+        vec3 materialColor = vec3(1,1,1);//vec3(1, 0.392, 0.118);
+        v_color = vec4(materialColor * intensity, 1.0);
+        v_normal = normal;       
 
         // 3D API에 전달하는 버텍스별 위치 출력
         gl_Position = u_worldViewProjection * position;
@@ -24,7 +26,7 @@ const vertexShader = `
 `;
 
 const pixelShader = `
-    precision mediump float;
+    precision highp float;
 
     // uniform: 모든 프래그먼트에 대해 동일하게 들어오는 입력
     uniform vec3 u_lightDirection;
@@ -38,7 +40,7 @@ const pixelShader = `
         gl_FragColor = v_color;
 
         float intensity = dot(normalize(v_normal), -u_lightDirection) * 0.5 + 0.5;
-        vec3 materialColor = vec3(1, 0.392, 0.118);
+        vec3 materialColor = vec3(1, 1, 1);
         gl_FragColor = vec4(materialColor * intensity, 1.0);
     }
 `;

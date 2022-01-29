@@ -43,6 +43,6 @@ export class Homework {
     }
 
     getRotateSpeed() {
-        return 1.0; // 0을 리턴하면 회전하지 않습니다.
+        return 0.0; // 0을 리턴하면 회전하지 않습니다.
     }
 }
