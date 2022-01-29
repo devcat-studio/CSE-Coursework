@@ -4,15 +4,13 @@
 <head>
     <meta charset="utf8">
     <!--
-
     @license twgl.js Copyright (c) 2015, Gregg Tavares All Rights Reserved.
     Available via the MIT license.
     see: http://github.com/greggman/twgl.js for details
-
     -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-    <title>twgl.js - twgl cube</title>
+    <title></title>
     <style>
         body {
             margin: 0;
@@ -40,42 +38,6 @@
     <div id="text" style='background:#efefef;'></div>
 </body>
 
-<!------------------- 버텍스 셰이더 ------------------->
-<script id="vs" type="notjs">
-    // uniform: 모든 버텍스에 대해 동일하게 들어오는 입력
-    uniform mat4 u_worldViewProjection;
-
-    // attribute: 각 버텍스마다 다른 입력
-    attribute vec4 position;
-    attribute vec3 color;
-
-    // varying: 프래그먼트 셰이더로 전달할 출력
-    varying vec4 v_color;
-
-    void main() {
-        v_color = vec4(color.rgb, 1.0);
-
-        // 3D API에 전달하는 출력
-        gl_Position = u_worldViewProjection * position;
-    }
-  </script>
-
-<!------------------- 프래그먼트(픽셀) 셰이더 ------------------->
-<script id="fs" type="notjs">
-    precision mediump float;
-
-    // uniform: 모든 프래그먼트에 대해 동일하게 들어오는 입력
-    // (지금은 없다)
-
-    // varying: 프래그먼트 셰이더로부터 받은 입력
-    varying vec4 v_color;
-
-    void main() {
-        // 3D API에 전달하는 출력. 이 프래그먼트(픽셀)의 최종 컬러를 지정한다.
-        gl_FragColor = v_color;
-    }
-</script>
-
 <script id="vsDebugDisplay" type="notjs">
     uniform mat4 u_worldViewProjection;
     attribute vec4 position;
@@ -100,12 +62,13 @@
     import * as twgl from '../twgl-full.module.js';
     import { Mesh, Lines, lineToPointDistance, rgba } from './Helper.mjs';
     import { Homework } from './Homework.mjs';
+    import * as shader from './Shader.mjs';
     
     const m4 = twgl.m4; // https://twgljs.org/docs/module-twgl_m4.html
     const v3 = twgl.v3; // https://twgljs.org/docs/module-twgl_v3.html
     const gl = document.querySelector("#canvas").getContext("webgl");
     const text = document.querySelector("#text");
-    const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
+    const programInfo = shader.createProgramInfo(gl);
     const debugDisplayProgramInfo = twgl.createProgramInfo(gl, ["vsDebugDisplay", "fsDebugDisplay"]);
 
     let homework = new Homework();
