@@ -175,7 +175,7 @@
             screenMousePos[2] = 1;
             const worldMousePos2 = m4.transformPoint(invWorldViewProjection, screenMousePos);
 
-            let minDist = 1.0;
+            let minDist = 0.2;
             let minIndex = undefined;
             for (let i = 0; i < mesh.vertexCount; ++i) {
                 let dist = lineToPointDistance(worldMousePos1, worldMousePos2, mesh.getPosition(i));
@@ -188,9 +188,17 @@
                 let pos = mesh.getPosition(minIndex);
                 text.innerHTML = `[#${minIndex}] (${pos[0]}, ${pos[1]}, ${pos[2]})`;
 
-                let i1 = lines.addVertex(pos, rgba(0, 0, 0, 0.3));
-                let i2 = lines.addVertex(v3.mulScalar(pos, 100), rgba(0, 0, 0, 1));
-                lines.addLine(i1, i2);
+                let indicatorColor = rgba(0, 0, 0, 1.0 - time % 0.6);
+                let indicatorHalfLength = 0.2;
+                lines.addLine(
+                    lines.addVertex(v3.add(pos, [-indicatorHalfLength, 0, 0]), indicatorColor),
+                    lines.addVertex(v3.add(pos, [indicatorHalfLength, 0, 0]), indicatorColor));
+                    lines.addLine(
+                    lines.addVertex(v3.add(pos, [0, -indicatorHalfLength, 0]), indicatorColor),
+                    lines.addVertex(v3.add(pos, [0, indicatorHalfLength, 0]), indicatorColor));
+                lines.addLine(
+                    lines.addVertex(v3.add(pos, [0, 0, -indicatorHalfLength]), indicatorColor),
+                    lines.addVertex(v3.add(pos, [0, 0, indicatorHalfLength]), indicatorColor));
             }
             else {
                 text.innerHTML = '';
