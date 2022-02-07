@@ -30,6 +30,7 @@ export class Mesh {
         this.arrays = {
             position: this.position,
             color: this.color,
+            normal: this.normal,
             indices: this.indices
         };
         this.vertexCount = 0;
